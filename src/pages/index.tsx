@@ -1,12 +1,12 @@
 import type { NextPage } from 'next';
-// import dynamic from 'next/dynamic';
+import dynamic from 'next/dynamic';
 import Head from 'next/head';
-// import React from 'react';
+import React from 'react';
 import styles from '../styles/Home.module.css';
 import { useState } from 'react';
 import axios from 'axios';
 
-// import ShyftLogo from '../styles/shyft_logo.svg';
+import ShyftLogo from '../styles/shyft_logo.svg';
 
 import {
     Container,
@@ -40,82 +40,80 @@ import CreateNAirdrop from '../components/CreateNAirdrop';
 const Home: NextPage = () => {
     const [address, setAddress] = useState('');
     const [network, setNetwork] = useState('devnet');
-    const [version,setVersion] = useState("v3");
+    const [version, setVersion] = useState('v3');
     const [allData, setAllData] = useState<any[]>([]);
-    const [opsComplete, setOpsComplete] = useState<'unloaded' | 'loading' | 'loaded' |"error" >("unloaded");
+    const [opsComplete, setOpsComplete] = useState<'unloaded' | 'loading' | 'loaded' | 'error'>('unloaded');
 
-    const setUpMonitors = async (address: string, network: string, version:string) => {
+    const setUpMonitors = async (address: string, network: string, version: string) => {
         var mintList: any[] = [];
         setOpsComplete('loading');
         try {
             await axios
-            .request({
-                url: '/api/candymachine-update-owners',
-                method: 'POST',
-                data: {
-                    cm_address: address,
-                    network: network,
-                    version: version
-                },
-            })
-            .then((res) => {
-                if (res.data.success) mintList = res.data.result ?? [];
-            })
-            .catch((err) => {
-                console.log(err);
-                mintList = [];
-            });
+                .request({
+                    url: '/api/candymachine-update-owners',
+                    method: 'POST',
+                    data: {
+                        cm_address: address,
+                        network: network,
+                        version: version,
+                    },
+                })
+                .then((res) => {
+                    if (res.data.success) mintList = res.data.result ?? [];
+                })
+                .catch((err) => {
+                    console.log(err);
+                    mintList = [];
+                });
 
             // console.log('Function complete: ', mintList);
             if (mintList.length > 0) {
                 await axios
-                .request({
-                    url: '/api/update-mints',
-                    method: 'POST',
-                    data: {
-                        reference_address: address,
-                        create_callbacks_on: mintList,
-                        network: network,
-                    },
-                })
-                .then((res) => {
-                    // if(res.data.success)
-                    //     setOpsComplete('loaded');
-                    console.log("Database updated");
-                })
-                .catch((err) => {
-                    console.log(err);
-                    setOpsComplete("error");
-                    throw err;
-                });
-            await new Promise(r => setTimeout(r, 500)); //use this if you have a rate limited API Key
-            await axios
-                .request({
-                    url: '/api/create-callback',
-                    method: 'POST',
-                    data: {
-                        reference_address: address,
-                        create_callbacks_on: mintList,
-                        network: network,
-                    },
-                })
-                .then((res) => {
-                    if (res.data.success) setOpsComplete('loaded');
-                })
-                .catch((err) => {
-                    console.log(err)
-                    setOpsComplete("error");
-                    throw err;
-                });
+                    .request({
+                        url: '/api/update-mints',
+                        method: 'POST',
+                        data: {
+                            reference_address: address,
+                            create_callbacks_on: mintList,
+                            network: network,
+                        },
+                    })
+                    .then((res) => {
+                        // if(res.data.success)
+                        //     setOpsComplete('loaded');
+                        console.log('Database updated');
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        setOpsComplete('error');
+                        throw err;
+                    });
+                await new Promise((r) => setTimeout(r, 500)); //use this if you have a rate limited API Key
+                await axios
+                    .request({
+                        url: '/api/create-callback',
+                        method: 'POST',
+                        data: {
+                            reference_address: address,
+                            create_callbacks_on: mintList,
+                            network: network,
+                        },
+                    })
+                    .then((res) => {
+                        if (res.data.success) setOpsComplete('loaded');
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        setOpsComplete('error');
+                        throw err;
+                    });
+            } else {
+                setOpsComplete('error');
             }
-            else
-            {
-                setOpsComplete("error");
-            } 
-        } catch (error:any) {
+        } catch (error: any) {
             console.log(error.message);
-            setOpsComplete("error");
-        }  
+            setOpsComplete('error');
+        }
     };
 
     return (
@@ -200,7 +198,7 @@ const Home: NextPage = () => {
                                         colorScheme={'gray'}
                                         w="100%"
                                         type={'button'}
-                                        onClick={() => setUpMonitors(address, network,version)}
+                                        onClick={() => setUpMonitors(address, network, version)}
                                     >
                                         Search
                                     </Button>
@@ -305,7 +303,6 @@ const Home: NextPage = () => {
                                 />
                             </Box>
                         </Link>
-                        
                     </Stack>
                 </Container>
             </Box>
